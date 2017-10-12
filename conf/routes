@@ -7,4 +7,5 @@ GET        /assets/*file                 controllers.Assets.versioned(path="/pub
 
 
 # chatroom
+GET        /chat/room/:roomId          controllers.chat.ChatController.room(roomId)
 GET        /chat/stream/:roomId          controllers.chat.ChatController.start(roomId)

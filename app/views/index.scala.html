@@ -1,0 +1,48 @@
+@(url: String, roomId: String)
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript">
+            $(document).ready(function(){
+                var user_name = btoa(Math.random()).substring(0, 10);
+                var ws = new WebSocket("ws://@url/chat/stream/@roomId?user_name=" + user_name);
+                ws.onopen = function(){
+                    console.log('connect');
+                }
+
+                ws.onmessage = function(m){
+                    console.log('data = ' + m.data);
+                    var json = JSON.parse(m.data);
+                    var message = json.userName + " says " + json.text;
+                    $('div#comment').append('<div>' + message + '</div>');
+                }
+
+                ws.onerror = function(e){
+                    console.log('error = ' + e);
+                }
+
+                ws.onclose = function(){
+                    console.log('close');
+                }
+
+                window.onbeforeunload = function(){
+                    ws.onclose();
+                }
+                $(':button[name=buttonMsg]').click(function() {
+                    var msg = $(':text[name=message]').val();
+                    var json = '{"userName":"' + user_name + '","text":"' + msg + '"}';
+                    console.log(json);
+                    ws.send(json);
+                });
+            });
+    </script>
+  </head>
+  <body>
+    <input type="text" name="message" value="">
+    <input type="button" name="buttonMsg" value="send message">
+    <h1>comment</h1>
+    <div id="comment">
+    </div>
+  </body>
+</html>
