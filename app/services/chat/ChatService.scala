@@ -11,6 +11,6 @@ class ChatService @Inject()(
   /**
    * Get or create chat room and join.
    */
-  def start(roomId: String, userName: String): ChatRoom = repository.chatRoom(roomId, userName)
+  def start(roomId: String): ChatRoom = repository.chatRoom(roomId)
 }
 

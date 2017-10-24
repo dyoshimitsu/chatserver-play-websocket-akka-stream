@@ -6,4 +6,4 @@ import akka.stream.scaladsl.Flow
 /**
  * Chat room.
  */
-case class ChatRoom(roomId: String, bus: Flow[ChatMessage, ChatMessage, UniqueKillSwitch])
+case class ChatRoom(roomId: String, bus: Flow[String, String, UniqueKillSwitch])

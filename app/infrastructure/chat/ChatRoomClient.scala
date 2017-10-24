@@ -6,7 +6,7 @@ import javax.inject.{ Inject, Singleton }
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{ BroadcastHub, Flow, Keep, MergeHub, Sink }
 import akka.stream.{ KillSwitches, Materializer, UniqueKillSwitch }
-import domains.chat.{ ChatMessage, ChatRoom, ChatRoomRepository }
+import domains.chat.{ ChatRoom, ChatRoomRepository }
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -22,7 +22,7 @@ class ChatRoomClient @Inject()(
 
   import ChatRoomClient._
 
-  override def chatRoom(roomId: String, userName: String): ChatRoom = synchronized {
+  override def chatRoom(roomId: String): ChatRoom = synchronized {
     roomPool.get.get(roomId) match {
       case Some(chatRoom) =>
         chatRoom
@@ -36,7 +36,7 @@ class ChatRoomClient @Inject()(
   private def create(roomId: String): ChatRoom = {
     // Create bus parts.
     val (sink, source) =
-      MergeHub.source[ChatMessage](perProducerBufferSize = 16)
+      MergeHub.source[String](perProducerBufferSize = 16)
           .toMat(BroadcastHub.sink(bufferSize = 256))(Keep.both)
           .run()
 
@@ -45,8 +45,8 @@ class ChatRoomClient @Inject()(
 
     val channel = ChatChannel(sink, source)
 
-    val bus: Flow[ChatMessage, ChatMessage, UniqueKillSwitch] = Flow.fromSinkAndSource(channel.sink, channel.source)
-        .joinMat(KillSwitches.singleBidi[ChatMessage, ChatMessage])(Keep.right)
+    val bus: Flow[String, String, UniqueKillSwitch] = Flow.fromSinkAndSource(channel.sink, channel.source)
+        .joinMat(KillSwitches.singleBidi[String, String])(Keep.right)
         .backpressureTimeout(3.seconds)
         .map { e =>
           println(s"$e $channel")
